@@ -105,7 +105,9 @@ sed -i -e"s|^logs_config:$|logs_config:\n  run_path: $DD_RUN_DIR|" "$DATADOG_CON
 # https://github.com/DataDog/datadog-agent/blob/master/pkg/config/config.go#L145
 
 if [ -z "$DD_API_KEY" ]; then
-  echo "DD_API_KEY environment variable not set. Run: heroku config:add DD_API_KEY=<your API key>"
+  if [ "$DD_LOG_LEVEL_LOWER" == "debug" ]; then
+    echo "DD_API_KEY environment variable not set. Run: heroku config:add DD_API_KEY=<your API key>"
+  fi
   DISABLE_DATADOG_AGENT=1
 fi
 
@@ -311,7 +313,9 @@ export DD_HEROKU_DYNO="true"
 
 # Execute the final run logic.
 if [ -n "$DISABLE_DATADOG_AGENT" ]; then
-  echo "The Datadog Agent has been disabled. Unset the DISABLE_DATADOG_AGENT or set missing environment variables."
+  if [ "$DD_LOG_LEVEL_LOWER" == "debug" ]; then
+    echo "The Datadog Agent has been disabled. Unset the DISABLE_DATADOG_AGENT or set missing environment variables."
+  fi
 else
   # Get the Agent version number
   DATADOG_VERSION="$(expr "$(bash -c "LD_LIBRARY_PATH=\"$DD_LD_LIBRARY_PATH\" $DD_BIN_DIR/agent version")" : 'Agent \([0-9]\+\.[0-9]\+.[0-9]\+\)')"
